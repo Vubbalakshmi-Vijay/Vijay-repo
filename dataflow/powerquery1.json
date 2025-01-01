@@ -1,0 +1,20 @@
+{
+	"name": "powerquery1",
+	"properties": {
+		"type": "WranglingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "DS_Employee",
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> DS_Employee",
+					"dataset": {
+						"referenceName": "DS_Employee",
+						"type": "DatasetReference"
+					}
+				}
+			],
+			"script": "section Section1;\r\nshared DS_Employee = let AdfDoc = AzureStorage.DataLakeContents(\"https://adlsgen2vijay.dfs.core.windows.net/data/input/employees.csv\"),Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]), PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]) in  PromotedHeaders;\r\nshared UserQuery = let Source = #\"DS_Employee\",\r\n  #\"Removed columns\" = Table.RemoveColumns(Source, {\"COMMISSION_PCT\", \"MANAGER_ID\", \"DEPARTMENT_ID\"}) in #\"Removed columns\";\r\n",
+			"documentLocale": "en-us"
+		}
+	}
+}

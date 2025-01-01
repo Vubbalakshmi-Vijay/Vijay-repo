@@ -1,0 +1,67 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Power Query1",
+				"type": "ExecuteWranglingDataflow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "powerquery1",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"UserQueryDSOutput": {
+								"FileName": {
+									"value": "@pipeline().parameters.FileName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"queries": [
+						{
+							"queryName": "UserQuery",
+							"dataflowSinks": [
+								{
+									"name": "UserQueryDSOutput",
+									"dataset": {
+										"referenceName": "DS_Output",
+										"type": "DatasetReference",
+										"parameters": {
+											"FileName": {
+												"value": "@pipeline().parameters.FileName",
+												"type": "Expression"
+											}
+										}
+									},
+									"script": "sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\t{2} as string,\n\t\t{2024-01-24T15:17:12Z} as string,\n\t\t{2024-01-24T15:34:53Z} as string,\n\t\t{13} as string,\n\t\t{3.33} as string,\n\t\t{15} as string,\n\t\tN as string,\n\t\t{239} as string,\n\t\t{246} as string,\n\t\t{19} as string,\n\t\t{20.5} as string,\n\t\t{0.011} as string,\n\t\t{0.5} as string,\n\t\t{3.0} as string,\n\t\t{0.014} as string,\n\t\t{1.0} as string,\n\t\t{27.5} as string,\n\t\t{2.5} as string,\n\t\t{0.018} as string\n\t),\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> UserQueryDSOutput"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"FileName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-30T12:38:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

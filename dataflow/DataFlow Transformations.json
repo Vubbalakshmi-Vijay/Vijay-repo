@@ -1,0 +1,175 @@
+{
+	"name": "DataFlow Transformations",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_Employee",
+						"type": "DatasetReference"
+					},
+					"name": "Employee"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_Output",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "join"
+				},
+				{
+					"name": "DerivedTRans"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "exists"
+				},
+				{
+					"name": "union"
+				},
+				{
+					"name": "lookup"
+				},
+				{
+					"name": "sort"
+				},
+				{
+					"name": "select"
+				},
+				{
+					"name": "pivot"
+				},
+				{
+					"name": "surrogateKey"
+				},
+				{
+					"name": "select111"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EMPLOYEE_ID as short,",
+				"          FIRST_NAME as string,",
+				"          LAST_NAME as string,",
+				"          EMAIL as string,",
+				"          PHONE_NUMBER as string,",
+				"          HIRE_DATE as string,",
+				"          JOB_ID as string,",
+				"          SALARY as short,",
+				"          COMMISSION_PCT as string,",
+				"          MANAGER_ID as string,",
+				"          DEPARTMENT_ID as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> Employee",
+				"Employee filter(like(FIRST_NAME,'A%')) ~> filter1",
+				"Employee aggregate(groupBy(DEPARTMENT_ID),",
+				"     SALARY = sum(SALARY)) ~> aggregate1",
+				"Employee, aggregate1 join(EMPLOYEE_ID == aggregate1@DEPARTMENT_ID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join",
+				"Employee split(like(FIRST_NAME,'S%'),",
+				"     disjoint: true) ~> DerivedTRans@(SFirstname, Other)",
+				"Employee derive(FIRST_NAME = upper((FIRST_NAME)),",
+				"          FULLNAME = concat(FIRST_NAME,LAST_NAME)) ~> derivedColumn1",
+				"Employee, aggregate1 exists(Employee@DEPARTMENT_ID == aggregate1@DEPARTMENT_ID,",
+				"     negate:false,",
+				"     broadcast: 'auto')~> exists",
+				"Employee, filter1 union(byName: true)~> union",
+				"Employee, union lookup(Employee@DEPARTMENT_ID == union@DEPARTMENT_ID,",
+				"     multiple: true,",
+				"     broadcast: 'auto')~> lookup",
+				"Employee sort(asc(FIRST_NAME, true),",
+				"     caseInsensitive: true) ~> sort",
+				"Employee select(mapColumn(",
+				"          emp_id = EMPLOYEE_ID,",
+				"          FIRST_NAME,",
+				"          LAST_NAME,",
+				"          mid = MANAGER_ID,",
+				"          PHONE_NUMBER,",
+				"          HIRE_DATE,",
+				"          email = EMAIL,",
+				"          SALARY",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select",
+				"Employee pivot(groupBy(DEPARTMENT_ID),",
+				"     pivotBy(MANAGER_ID),",
+				"     {} = count(EMPLOYEE_ID),",
+				"     columnNaming: 'Manager_$N$V_ID',",
+				"     lateral: true) ~> pivot",
+				"Employee keyGenerate(output(NewKeyFields as long),",
+				"     startAt: 1000L,",
+				"     stepValue: 1000L) ~> surrogateKey",
+				"surrogateKey select(mapColumn(",
+				"          NewKeyField = NewKeyFields,",
+				"          LAST_NAME,",
+				"          EMAIL,",
+				"          PHONE_NUMBER,",
+				"          HIRE_DATE,",
+				"          JOB_ID,",
+				"          SALARY,",
+				"          COMMISSION_PCT,",
+				"          MANAGER_ID,",
+				"          DEPARTMENT_ID,",
+				"          NewKeyFields",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select111",
+				"Employee alterRow(insertIf(like(FIRST_NAME,'S%'))) ~> alterRow1",
+				"filter1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          {2} as string,",
+				"          {2024-01-24T15:17:12Z} as string,",
+				"          {2024-01-24T15:34:53Z} as string,",
+				"          {13} as string,",
+				"          {3.33} as string,",
+				"          {15} as string,",
+				"          N as string,",
+				"          {239} as string,",
+				"          {246} as string,",
+				"          {19} as string,",
+				"          {20.5} as string,",
+				"          {0.011} as string,",
+				"          {0.5} as string,",
+				"          {3.0} as string,",
+				"          {0.014} as string,",
+				"          {1.0} as string,",
+				"          {27.5} as string,",
+				"          {2.5} as string,",
+				"          {0.018} as string",
+				"     ),",
+				"     partitionFileNames:['EMP.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}

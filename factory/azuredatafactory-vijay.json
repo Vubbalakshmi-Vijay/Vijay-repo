@@ -1,0 +1,9 @@
+{
+	"name": "azuredatafactory-vijay",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "01a5b22a-1756-4ebb-81d6-6e76ce106fa4",
+		"tenantId": "9f587e37-ff16-4df3-8a6b-acf83551be76"
+	}
+}
